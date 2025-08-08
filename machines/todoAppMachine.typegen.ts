@@ -4,19 +4,22 @@
   export interface Typegen0 {
         '@@xstate/typegen': true;
         internalEvents: {
-          "xstate.init": { type: "xstate.init" };
+          "done.invoke.Todo_machine.Loading_todos:invocation[0]": { type: "done.invoke.Todo_machine.Loading_todos:invocation[0]"; data: unknown; __tip: "See the XState TS docs to learn how to strongly type this." };
+"error.platform.Todo_machine.Loading_todos:invocation[0]": { type: "error.platform.Todo_machine.Loading_todos:invocation[0]"; data: unknown };
+"xstate.init": { type: "xstate.init" };
         };
         invokeSrcNameMap: {
-          
+          "loadTodos": "done.invoke.Todo_machine.Loading_todos:invocation[0]";
         };
         missingImplementations: {
           actions: never;
           delays: never;
           guards: never;
-          services: never;
+          services: "loadTodos";
         };
         eventsCausingActions: {
-          "consoleLogTodos": "todos_loaded";
+          "assignErrorToContext": "error.platform.Todo_machine.Loading_todos:invocation[0]";
+"assignTodosToContext": "done.invoke.Todo_machine.Loading_todos:invocation[0]";
         };
         eventsCausingDelays: {
           
@@ -25,7 +28,7 @@
           
         };
         eventsCausingServices: {
-          
+          "loadTodos": "xstate.init";
         };
         matchesStates: "Loading_todos" | "Loading_todos_failed" | "Todos_loaded";
         tags: never;

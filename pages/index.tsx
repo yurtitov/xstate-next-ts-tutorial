@@ -3,33 +3,19 @@ import type { NextPage } from 'next';
 import { todosMachine } from '../machines/todoAppMachine';
 
 const Home: NextPage = () => {
-  const [state, send] = useMachine(todosMachine);
+  const [state, send] = useMachine(todosMachine, {
+    services: {
+      loadTodos: async () => {
+        // throw new Error('Oh no!!!');
+        return ['Take bins out', 'Do laundry'];
+      },
+    },
+  });
 
   return (
     <div>
-      {JSON.stringify(state.value)}
-
-      <button
-        onClick={() =>
-          send({
-            type: 'todos_loaded',
-            todos: ['Take bins out'],
-          })
-        }
-      >
-        Todos loaded
-      </button>
-
-      <button
-        onClick={() =>
-          send({
-            type: 'loading_todos_failed',
-            errorMessage: 'Oh no',
-          })
-        }
-      >
-        Loading todos failed
-      </button>
+      <pre>{JSON.stringify(state.value)}</pre>
+      <pre>{JSON.stringify(state.context)}</pre>
     </div>
   );
 };

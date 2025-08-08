@@ -1,24 +1,34 @@
-import { createMachine } from 'xstate';
+import { createMachine, assign } from 'xstate';
 
-/** @xstate-layout N4IgpgJg5mDOIC5QBUD2FUH0C2BDAxgBYCWAdmAHQAyquEZUmALuqrAMQsayYA2tESAG0ADAF1EoAA5tiTYqlKSQAD0QAOAKwUALAEYAbAGYAnAfUmd6kQYDsAGhABPRAFpjFdbb0iTvgEwitiIi-rYGAL4RjmgYOAQk5NQCDMysHPx0qVxsmABmuMS8wuLKMrByCkpIqm5GRv66piLqRiL1-nq2Ds5uHl4+fiaBwaHhUdEgpOhwyrFYeERkYGWy8orKagiuRtZNfq3tDV09Ltt6e2a2ZruaJiaGRlExrPFLSTRZpIw58DXllQ2NS2rj0eka3k0xis4IuhgMjjOrhMRgoBjsZk0gXUOm8Rh0zxA8zeiUo8x4mUEEFWFXW1VAW1sqJEYLxdx8OiMTMRiB8zJxOhEOgMJnU-mFdkJxMWpOSXx+6XyhWK1P+ayqmzcYREFDBvkMFy5-gRvQQfIoLR0guFovF6JMEwiQA */
+/** @xstate-layout N4IgpgJg5mDOIC5QBUD2FUH0C2BDAxgBYCWAdmAHQAyquEZUmALuqrAMQbkVkBuqAa0poMOAiW406DZq1gI+qfLibFUpANoAGALradiUAAc2xVesMgAHogCMtgJwUALLecOAzFoDsANm8ArAG2vgEANCAAnogAtL4ATBQe3vZaHg6+bg4BDvG+AL75ESJYeERklFL0pIwsGBxgAE6NqI0URgA2KgBmrdgUJWLlkrTVtXIKpPzK5pq6+pYmsGZqpJY2CDEeHonO6VoAHF7b8bbe3hHRm74eFAcpWg6P8T5aWvF+hUUgpOhwloMyhIwItTLN1rEPActC59kc0jszhcorFbNCKBlvBl7rlfA4DmdCsVWENgdRRjI6mxQctwUhrKjbIkUgEbs4CacCb5fJdYp4KNysaEXgdnCkPM4iSBAeIKgM5JgOqNIDSVhZ6Rt7E4ElobrrvPF4g4HOdeQhbGkKIdnM4tM48Qd4vb-FKZcNKhSarJ6phurhiB0VfSlmq1hrYh8YakHCE0ck8maLbdrbb7findyHF98kA */
 export const todosMachine = createMachine(
   {
+    tsTypes: {} as import('./todoAppMachine.typegen').Typegen0,
+    schema: {
+      services: {} as {
+        loadTodos: {
+          data: string[];
+        };
+      },
+    },
+    context: {
+      todos: [] as string[],
+      errorMessage: undefined as string | undefined,
+    },
     id: 'Todo_machine',
     initial: 'Loading_todos',
-    schema: {
-      events: {} as
-        | { type: 'todos_loaded'; todos: string[] }
-        | { type: 'loading_todos_failed'; errorMessage: string },
-    },
-    tsTypes: {} as import('./todoAppMachine.typegen').Typegen0,
     states: {
       Loading_todos: {
-        on: {
-          todos_loaded: {
+        invoke: {
+          src: 'loadTodos',
+
+          onDone: {
+            actions: 'assignTodosToContext',
             target: 'Todos_loaded',
-            actions: 'consoleLogTodos',
           },
-          loading_todos_failed: {
+
+          onError: {
+            actions: 'assignErrorToContext',
             target: 'Loading_todos_failed',
           },
         },
@@ -30,9 +40,16 @@ export const todosMachine = createMachine(
   },
   {
     actions: {
-      consoleLogTodos: (context, event) => {
-        alert(JSON.stringify(event.todos));
-      },
+      assignTodosToContext: assign((context, event) => {
+        return {
+          todos: event.data,
+        };
+      }),
+      assignErrorToContext: assign((context, event) => {
+        return {
+          errorMessage: (event.data as Error).message,
+        };
+      }),
     },
   }
 );
