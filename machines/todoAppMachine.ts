@@ -1,6 +1,6 @@
 import { createMachine, assign } from 'xstate';
 
-/** @xstate-layout N4IgpgJg5mDOIC5QBUD2FUH0C2BDAxgBYCWAdmAHQAyquEZUmALuqrAMQbkVkBuqAa0poMOAiW406DZq1gI+qfLibFUpANoAGALradiUAAc2xVesMgAHogCMtgJwUALLecOAzFoDsANm8ArAG2vgEANCAAnogAtL4ATBQe3vZaHg6+bg4BDvG+AL75ESJYeERklFL0pIwsGBxgAE6NqI0URgA2KgBmrdgUJWLlkrTVtXIKpPzK5pq6+pYmsGZqpJY2CDEeHonO6VoAHF7b8bbe3hHRm74eFAcpWg6P8T5aWvF+hUUgpOhwloMyhIwItTLN1rEPActC59kc0jszhcorFbNCKBlvBl7rlfA4DmdCsVWENgdRRjI6mxQctwUhrKjbIkUgEbs4CacCb5fJdYp4KNysaEXgdnCkPM4iSBAeIKgM5JgOqNIDSVhZ6Rt7E4ElobrrvPF4g4HOdeQhbGkKIdnM4tM48Qd4vb-FKZcNKhSarJ6phurhiB0VfSlmq1hrYh8YakHCE0ck8maLbdrbb7findyHF98kA */
+/** @xstate-layout N4IgpgJg5mDOIC5QBUD2FUH0C2BDAxgBYCWAdmAHQAyquEZUmALuqrAMQbkVkBuqAa0poMOAiW406DZq1gI+qfLibFUpANoAGALradiUAAc2xVesMgAHogC0ANgBMFAIyOXAThcB2XwA4tLQBmLT8AGhAATzsPDwoAVgD4gBZAj3jvR2SXIIBfXIiRLDwiMkopelJGFgwOMAAnetR6iiMAGxUAM2bsCiKxUslaSuq5BVJ+ZXNNXX1LE1gzNVJLGwRbR28giiC-Dy14oIyg+3tkjwjo9ZcKP3s-eJzve287+yCXP0d8wtYBiWEckwbWGkHYAGF6mAVGAAATkADucyQIAWSwsKLWRzi9n2JwCgWSuOS8UudleFEc8WpQVSoW86Ucfh+IH6JQBFEh0NUVXhYARsJqqAoAGVCKgEQxYd16thYWQjABXJjsABiPXlpCVTFhRFwVTAyOMpmmq0QH2SFG88X2HiyWhc9i0WTJCA8208ny0dtiNrO+QKIFI6DgljZ4jK8xNyzN6yCVNu8b8LnijiCeNS9ldtk+cSO1KJLiLGRT9hZ4cG5WGMiF8BRaNNmLsmxuySTn3OZydyWzLmdFAONOtXyCtPsLnLf3ZZT6QJBdEgUcWjdAa0dredDPSba0vkc2Yp9mph28qWpjk2yUnomnQ2kVVktUwnVwxDai-r0Yxq+bvkTTJTNMMy0LMokQPs4kdfNngdXYUjyQMKw5LkVClRFBVYJd0RWJsEEcU4rRtb17UdZ0ezAhB4luLxk02Kl4mCRxAnia9igjbgUJ5KA+QFIVRXFSVeRlOUFWVLCV2sRB4heChsndYIQI+BigldCDXHeakYJyB42wDXIgA */
 export const todosMachine = createMachine(
   {
     tsTypes: {} as import('./todoAppMachine.typegen').Typegen0,
@@ -10,10 +10,19 @@ export const todosMachine = createMachine(
           data: string[];
         };
       },
+      events: {} as
+        | {
+            type: 'Create new';
+          }
+        | {
+            type: 'Form input change';
+            value: string;
+          },
     },
     context: {
       todos: [] as string[],
       errorMessage: undefined as string | undefined,
+      createNewTodoFormInput: '',
     },
     id: 'Todo_machine',
     initial: 'Loading_todos',
@@ -34,8 +43,28 @@ export const todosMachine = createMachine(
         },
       },
 
-      Todos_loaded: {},
+      Todos_loaded: {
+        on: {
+          'Create new': 'Creating new todo',
+        },
+      },
+
       Loading_todos_failed: {},
+      'Creating new todo': {
+        states: {
+          'Showing form input': {
+            on: {
+              'Form input change': {
+                target: 'Showing form input',
+                internal: true,
+                actions: 'assignFormInputToContext',
+              },
+            },
+          },
+        },
+
+        initial: 'Showing form input',
+      },
     },
   },
   {
@@ -48,6 +77,11 @@ export const todosMachine = createMachine(
       assignErrorToContext: assign((context, event) => {
         return {
           errorMessage: (event.data as Error).message,
+        };
+      }),
+      assignFormInputToContext: assign((context, event) => {
+        return {
+          createNewTodoFormInput: event.value,
         };
       }),
     },
